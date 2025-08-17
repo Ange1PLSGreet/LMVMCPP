@@ -1,5 +1,6 @@
 #pragma once
 #include "../opcode.h"
+#include <iostream>
 #include <stdint.h>
 #include <vector>
 #include <string>
@@ -27,6 +28,7 @@ public:
         for (auto& reg : registers) {
             reg = 0;
         }
+        heap.push_back(0);// 堆顶为 0
     }
 
     // 执行一组指令
@@ -35,7 +37,7 @@ public:
             execute(instr);
         }
     }
-
+    
 private:
     int64_t registers[NUM_REGS]; // r0 ~ r9
     std::vector<int8_t> heap;    // 堆
@@ -44,5 +46,4 @@ private:
     void execute(opcode::Instruction instr);
     void vmcall(const VmCallList key);
     void vm_error(opcode::Instruction instr);
-    
 };

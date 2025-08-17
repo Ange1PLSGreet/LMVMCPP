@@ -13,9 +13,8 @@ void RegisterVM::execute(opcode::Instruction instr) {
         switch (instr.op) {
             case OpCode::NEW: {
                 if(instr.data.empty()) vm_error(instr);
-                for(auto c: instr.data){
-                    heap.push_back(c);
-                }
+                heap.reserve(heap.size() + instr.data.size());
+                heap.insert(heap.end(),instr.data.begin(),instr.data.end());
             }
             case OpCode::MOVRI: {
                 registers[instr.rd] = instr.imm;
@@ -50,7 +49,7 @@ void RegisterVM::execute(opcode::Instruction instr) {
                     break;
                 }
                 case VmCallList::CONSOLE_WRITE: {
-                    for(size_t i=registers[1];heap[i]!=0;i++)std::cout.put(heap[i]);
+                    for(size_t i=registers[1];heap[i]!=0;i++)putchar(heap[i]);
                     break;
                 }
                 case VmCallList::EXIT: {
