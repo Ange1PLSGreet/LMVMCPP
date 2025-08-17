@@ -1,10 +1,16 @@
 add_rules("mode.debug", "mode.release")
 set_languages("c++20")
+set_optimize("fastest")
 
 target("LMVMCPP")
     set_kind("binary")
     add_files("src/*.cpp")
     add_files("src/vm/*.cpp")
+
+--target("test_file_generator")
+    --set_kind("binary")
+    --add_files("src/test_file_generator/*.cpp")
+    --add_files("src/file_loader.cpp")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io
@@ -74,4 +80,3 @@ target("LMVMCPP")
 --
 -- @endcode
 --
-

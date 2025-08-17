@@ -1,0 +1,79 @@
+#include "../file_loader.h"
+#include <fstream>
+#include <iostream>
+#include <vector>
+
+int main(int argc, char *argv[])
+{
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <output_file> [version]" << std::endl;
+        return 1;
+    }
+
+    std::string filename = argv[1];
+    uint32_t version = file_loader::CURRENT_VERSION;
+
+    if (argc > 2) {
+        try {
+            version = static_cast<uint32_t>(std::stoi(argv[2]));
+        } catch (const std::exception &e) {
+            std::cerr << "Invalid version number: " << argv[2] << std::endl;
+            return 1;
+        }
+    }
+
+    // 创建测试文件
+    std::ofstream file(filename, std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Failed to create test file: " << filename << std::endl;
+        return 1;
+    }
+
+    // 创建一些测试代码数据
+    std::vector<uint8_t> testCode = {
+        0x01, 0x02, 0x03, 0x04, 0x05, // 一些测试字节
+        0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
+        0xFF, 0xFE, 0xFD, 0xFC, 0xFB, // 更多测试字节
+        0x01,
+        0x02, 0x03, 0x04, 0x05, // 一些测试字节
+        0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
+        0xFF, 0xFE, 0xFD, 0xFC, 0xFB, // 更多测试字节
+        0x01,
+        0x02, 0x03, 0x04, 0x05, // 一些测试字节
+        0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
+        0xFF, 0xFE, 0xFD, 0xFC, 0xFB, // 更多测试字节
+        0x01,
+        0x02, 0x03, 0x04, 0x05, // 一些测试字节
+        0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
+        0xFF, 0xFE, 0xFD, 0xFC, 0xFB // 更多测试字节
+        ,
+        0x01, 0x02, 0x03, 0x04, 0x05, // 一些测试字节
+        0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
+        0xFF, 0xFE, 0xFD, 0xFC, 0xFB, // 更多测试字节
+        0x01,
+        0x02, 0x03, 0x04, 0x05, // 一些测试字节
+        0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
+        0xFF, 0xFE, 0xFD, 0xFC, 0xFB, // 更多测试字节
+        0x01,
+        0x02, 0x03, 0x04, 0x05, // 一些测试字节
+        0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
+        0xFF, 0xFE, 0xFD, 0xFC, 0xFB, // 更多测试字节
+        0x01,
+        0x02, 0x03, 0x04, 0x05, // 一些测试字节
+        0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
+        0xFF, 0xFE, 0xFD, 0xFC, 0xFB // 更多测试字节
+    };
+
+    // 写入文件头
+    file_loader::writeFileHeader(file, testCode.size());
+
+    // 写入测试代码数据
+    file.write(reinterpret_cast<const char *>(testCode.data()), testCode.size());
+
+    file.close();
+
+    std::cout << "Test file '" << filename << "' created successfully with version "
+              << version << " and code size " << testCode.size() << " bytes." << std::endl;
+
+    return 0;
+}
