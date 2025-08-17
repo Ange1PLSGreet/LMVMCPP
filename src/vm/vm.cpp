@@ -112,58 +112,6 @@ void RegisterVM::execute(opcode::Instruction instr) {
                 }
                 break;
             }
-            // 文件操作指令处理
-            case OpCode::FOPEN: {
-                // 从堆中获取文件名
-                std::string filename;
-                for (size_t i = instr.imm; i < heap.size() && heap[i] != 0; ++i) {
-                    filename += static_cast<char>(heap[i]);
-                }
-                
-                // 根据rs寄存器的值确定打开模式
-                std::ios::openmode mode = std::ios::in | std::ios::out;
-                if (registers[instr.rs] & 1) mode = std::ios::in;
-                if (registers[instr.rs] & 2) mode = std::ios::out;
-                if (registers[instr.rs] & 4) mode |= std::ios::app;
-                if (registers[instr.rs] & 8) mode |= std::ios::binary;
-                
-                registers[instr.rd] = file_open(filename, mode);
-                break;
-            }
-            case OpCode::FREAD: {
-                // 从文件中读取数据到堆中
-                auto data = file_read(registers[instr.rs], static_cast<size_t>(instr.imm));
-                
-                // 将数据写入堆中
-                heap.reserve(heap_ptr + data.size() + 1);
-                if (heap.size() < heap_ptr + data.size() + 1) {
-                    heap.resize(heap_ptr + data.size() + 1);
-                }
-                
-                for (size_t i = 0; i < data.size(); ++i) {
-                    heap[heap_ptr + i] = data[i];
-                }
-                heap[heap_ptr + data.size()] = 0; // 空终止符
-                
-                // 返回读取的字节数
-                registers[instr.rd] = static_cast<int64_t>(data.size());
-                break;
-            }
-            case OpCode::FWRITE: {
-                // 从堆中获取要写入的数据
-                std::vector<int8_t> data;
-                for (size_t i = instr.imm; i < heap.size() && heap[i] != 0; ++i) {
-                    data.push_back(heap[i]);
-                }
-                
-                file_write(registers[instr.rs], data);
-                registers[instr.rd] = static_cast<int64_t>(data.size());
-                break;
-            }
-            case OpCode::FCLOSE: {
-                file_close(registers[instr.rd]);
-                break;
-            }
             case OpCode::HALT: {
                 return;
             }
