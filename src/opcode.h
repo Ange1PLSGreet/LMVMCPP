@@ -36,16 +36,17 @@ namespace opcode {
     // =========================
     struct Instruction {
         OpCode op = OpCode::UNKNOWN;
-        uint8_t rd= 0;       // 目标寄存器编号
-        uint8_t rs= 0;       // 源寄存器编号（部分指令用到）
+        uint8_t rd= 0;            // 目标寄存器编号 left
+        uint8_t rs= 0;            // 源寄存器编号（部分指令用到）right
+        int64_t imm;              // 立即数（部分指令用到）right
+        int64_t mem;              //堆地址（部分指令用到）left
+        std::vector<int8_t> data; // 一大串数据（部分指令用到）~
         int32_t dstOffset = 0;   // 目标偏移
         int32_t srcOffset = 0;   // 源偏移
-        int64_t imm = 0;         // 立即数
         // 添加选项字段来控制编码/解码行为
         bool hasDstOffset = false;  // 是否有目标偏移
         bool hasSrcOffset = false;  // 是否有源偏移
         bool hasImmediate = false;  // 是否有立即数
-        std::vector<int8_t> data; // 一大串数据（部分指令用到）
         
         std::size_t size = 0;
 
@@ -65,3 +66,4 @@ namespace opcode {
 
 
 } // namespace opcode
+
