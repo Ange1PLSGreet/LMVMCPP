@@ -24,12 +24,24 @@ void RegisterVM::execute(opcode::Instruction instr) {
                 registers[instr.rd] = instr.imm;
                 break;
             }
+            case OpCode::MOVRM: {
+                registers[instr.rd] = instr.imm;
+                break;
+            }
             case OpCode::MOVRR: {
                 registers[instr.rd] = registers[instr.rs];
                 break;
             }
-            case OpCode::MOVRM: {
-                registers[instr.rd] = registers[instr.rs] == 0 ? instr.imm : registers[instr.rs];
+            case OpCode::MOVMI: {
+                heap[instr.mem] = instr.imm;
+                break;
+            }
+            case OpCode::MOVMM: {
+                heap[instr.mem] = registers[instr.imm];
+                break;
+            }
+            case OpCode::MOVMR: {
+                heap[instr.mem] = registers[instr.rs];
                 break;
             }
             case OpCode::ADDR: {
@@ -41,10 +53,41 @@ void RegisterVM::execute(opcode::Instruction instr) {
                 break;
             }
             case OpCode::ADDM: {
-                break;
+                registers[instr.rd] += heap[instr.mem];
             }
             case OpCode::SUBR: {
                 registers[instr.rd] -= registers[instr.rs];
+                break;
+            }
+            case OpCode::SUBI: {
+                registers[instr.rd] -= instr.imm;
+                break;
+            }
+            case OpCode::SUBM: {
+                registers[instr.rd] -= heap[instr.mem];
+            }
+            case OpCode::MULR: {
+                registers[instr.rd] *= registers[instr.rs];
+                break;
+            }
+            case OpCode::MULI: {
+                registers[instr.rd] *= instr.imm;
+                break;
+            }
+            case OpCode::MULM: {
+                registers[instr.rd] *= heap[instr.mem];
+                break;
+            }
+            case OpCode::DIVR: {
+                registers[instr.rd] /= registers[instr.rs];
+                break;
+            }
+            case OpCode::DIVI: {
+                registers[instr.rd] /= instr.imm;
+                break;
+            }
+            case OpCode::DIVM: {
+                registers[instr.rd] /= heap[instr.mem];
                 break;
             }
             case OpCode::VMCALL: {
@@ -85,3 +128,4 @@ size_t RegisterVM::newFunc(const std::vector<opcode::Instruction>& program) {
         FuncLists.push_back(program);
         return index;
 }
+
