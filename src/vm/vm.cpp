@@ -64,19 +64,10 @@ void RegisterVM::execute(opcode::Instruction instr) {
                 break;
             }
             case OpCode::CALL: {
-                switch (static_cast<VmCallList>(instr.imm)) {
-                case VmCallList::CONSOLE_READ: {
-                    // registers[instr.rd] = getchar();
-                    break;
-                }
-                case VmCallList::CONSOLE_WRITE: {
-                    for (size_t i = registers[1]; heap[i] != 0; i++)
-                        putchar(heap[i]);
-                    break;
-                }
-                case VmCallList::EXIT: {
-                    exit(registers[instr.rd]);
-                }
+                try {
+                    run(FuncLists[instr.imm]);
+                } catch (const std::exception& e) {
+                    std::cerr << "VM Error: " << e.what() << std::endl;
                 }
                 break;
             }
@@ -86,4 +77,11 @@ void RegisterVM::execute(opcode::Instruction instr) {
             default:
                 throw std::runtime_error("Unknown opcode");
         }
+
     }
+
+size_t RegisterVM::newFunc(const std::vector<opcode::Instruction>& program) { 
+        size_t index = FuncLists.size();
+        FuncLists.push_back(program);
+        return index;
+}
