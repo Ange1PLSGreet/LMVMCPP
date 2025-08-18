@@ -1,13 +1,13 @@
 #include "opcode.h"
 #include <stdexcept>
-
+#include <iostream>
 namespace opcode
 {
 
     // 定义一个映射表，键为操作码，值为一个三元组表示(hasDstOffset, hasSrcOffset, hasImmediate)
     std::unordered_map<OpCode, std::tuple<bool, bool, bool>> opcodeFlagMap = {
         // 基本控制指令
-        {OpCode::VMCALL, {false, false, false}},
+        {OpCode::VMCALL, {false, false, true}},
         {OpCode::SYSCALL, {false, false, false}},
         {OpCode::HALT, {false, false, false}},
         {OpCode::END, {false, false, false}},
@@ -16,47 +16,41 @@ namespace opcode
         // 数据移动指令
         {OpCode::MOVRI, {false, false, true}},  // 立即数到寄存器，需要立即数
         {OpCode::MOVRR, {false, false, false}}, // 寄存器到寄存器，只需要寄存器
-        {OpCode::MOVRM, {false, false, true}},  // 寄存器到内存，需要立即数作为地址
-        {OpCode::MOVMI, {false, false, false}},
-        {OpCode::MOVMR, {false, false, false}},
-        {OpCode::MOVMM, {false, false, false}},
+        {OpCode::MOVRM, {false, true, false}},  // 寄存器到内存，需要立即数作为地址
+        {OpCode::MOVMI, {true, false, true}},
+        {OpCode::MOVMR, {true, false, false}},
+        {OpCode::MOVMM, {true, true, false}},
 
         // 加法指令
-        {OpCode::ADDR, {true, true, false}}, // 寄存器到寄存器，可能需要偏移
-        {OpCode::ADDM, {true, true, false}}, // 内存到内存，需要偏移
-        {OpCode::ADDI, {true, true, true}},  // 加立即数，需要偏移和立即数
+        {OpCode::ADDR, {false, false, false}}, // 寄存器到寄存器，可能需要偏移
+        {OpCode::ADDM, {false, true, false}},  // 内存到内存，需要偏移
+        {OpCode::ADDI, {false, false, true}},  // 加立即数，需要偏移和立即数
 
         // 减法指令
-        {OpCode::SUBR, {true, true, false}},
-        {OpCode::SUBM, {true, true, false}},
-        {OpCode::SUBI, {true, true, true}},
+        {OpCode::SUBR, {false, false, false}},
+        {OpCode::SUBM, {false, true, false}},
+        {OpCode::SUBI, {false, false, true}},
 
         // 乘法指令
-        {OpCode::MULR, {true, true, false}},
-        {OpCode::MULM, {true, true, false}},
-        {OpCode::MULI, {true, true, true}},
+        {OpCode::MULR, {false, false, false}},
+        {OpCode::MULM, {false, true, false}},
+        {OpCode::MULI, {false, false, true}},
 
         // 除法指令
-        {OpCode::DIVR, {true, true, false}},
-        {OpCode::DIVM, {true, true, false}},
-        {OpCode::DIVI, {true, true, true}},
+        {OpCode::DIVR, {false, false, false}},
+        {OpCode::DIVM, {false, true, false}},
+        {OpCode::DIVI, {false, false, true}},
 
         // 控制流和函数相关指令
         {OpCode::NEW, {false, false, false}}, // 创建新对象，使用data字段
         {OpCode::FUNC, {false, false, false}},
-        {OpCode::CALL, {false, false, false}},
+        {OpCode::CALL, {false, false, true}},
         {OpCode::LOOP, {false, false, false}},
         {OpCode::RET, {false, false, false}},
 
         {OpCode::IF, {false, false, false}},
         {OpCode::ELSE, {false, false, false}},
         {OpCode::ENDIF, {false, false, false}},
-
-        // 文件操作指令
-        {OpCode::FOPEN, {false, false, true}},  // 需要立即数作为文件名地址
-        {OpCode::FREAD, {true, true, true}},    // 需要各种参数
-        {OpCode::FWRITE, {true, true, true}},   // 需要各种参数
-        {OpCode::FCLOSE, {false, false, false}} // 只需要寄存器中的文件描述符
     };
 
     void Instruction::autoSetFlags()
@@ -177,6 +171,10 @@ namespace opcode
 
     void Instruction::decode(const std::vector<uint8_t> &bytes)
     {
+        if (bytes.empty()) {
+            return;
+        }
+
         if (bytes.size() < 2) {
             throw std::runtime_error("insufficient data for decoding");
         }

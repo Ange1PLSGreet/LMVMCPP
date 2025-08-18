@@ -3,32 +3,6 @@
 
 namespace file_loader
 {
-
-    std::vector<uint8_t> loadAndValidateFile(const std::string &filename)
-    {
-        // 打开文件
-        std::ifstream file(filename, std::ios::binary);
-        if (!file.is_open()) {
-            throw std::runtime_error("Failed to open file: " + filename);
-        }
-
-        // 读取文件头
-        FileHeader header = readFileHeader(file);
-
-        // 验证文件头
-        if (!validateHeader(header)) {
-            throw std::runtime_error("Invalid file format or unsupported version");
-        }
-
-        // 读取代码段
-        std::vector<uint8_t> code(header.codeSize);
-        if (!file.read(reinterpret_cast<char *>(code.data()), header.codeSize)) {
-            throw std::runtime_error("Failed to read code segment");
-        }
-
-        return code;
-    }
-
     FileData loadFullFileData(const std::string &filename)
     {
         // 打开文件
@@ -85,11 +59,11 @@ namespace file_loader
         // 读取版本号
         file.read(reinterpret_cast<char *>(&header.version), sizeof(header.version));
 
-        // 读取代码段长度
-        file.read(reinterpret_cast<char *>(&header.codeSize), sizeof(header.codeSize));
-
         // 读取指令数量
         file.read(reinterpret_cast<char *>(&header.codeNum), sizeof(header.codeNum));
+
+        // 读取代码段长度
+        file.read(reinterpret_cast<char *>(&header.codeSize), sizeof(header.codeSize));
 
         // 读取数据段长度
         file.read(reinterpret_cast<char *>(&header.dataSize), sizeof(header.dataSize));

@@ -12,55 +12,6 @@ void RegisterVM::vm_error(Instruction instr) {
     exit(1);
 }
 
-// 文件打开方法
-int64_t RegisterVM::file_open(const std::string& filename, std::ios::openmode mode) {
-    std::fstream file(filename, mode);
-    if (!file.is_open()) {
-        throw std::runtime_error("Failed to open file: " + filename);
-    }
-    
-    int64_t fd = next_file_descriptor++;
-    file_descriptors[fd] = std::move(file);
-    return fd;
-}
-
-// 文件读取方法
-std::vector<int8_t> RegisterVM::file_read(int64_t fd, size_t count) {
-    auto it = file_descriptors.find(fd);
-    if (it == file_descriptors.end()) {
-        throw std::runtime_error("Invalid file descriptor");
-    }
-    
-    std::vector<int8_t> buffer(count);
-    it->second.read(reinterpret_cast<char*>(buffer.data()), count);
-    
-    // 调整缓冲区大小以匹配实际读取的字节数
-    buffer.resize(it->second.gcount());
-    return buffer;
-}
-
-// 文件写入方法
-void RegisterVM::file_write(int64_t fd, const std::vector<int8_t>& data) {
-    auto it = file_descriptors.find(fd);
-    if (it == file_descriptors.end()) {
-        throw std::runtime_error("Invalid file descriptor");
-    }
-    
-    it->second.write(reinterpret_cast<const char*>(data.data()), data.size());
-    it->second.flush();
-}
-
-// 文件关闭方法
-void RegisterVM::file_close(int64_t fd) {
-    auto it = file_descriptors.find(fd);
-    if (it == file_descriptors.end()) {
-        throw std::runtime_error("Invalid file descriptor");
-    }
-    
-    it->second.close();
-    file_descriptors.erase(it);
-}
-
 void RegisterVM::execute(opcode::Instruction instr) {
         switch (instr.op) {
             case OpCode::NEW: {
@@ -104,6 +55,23 @@ void RegisterVM::execute(opcode::Instruction instr) {
                 }
                 case VmCallList::CONSOLE_WRITE: {
                     for(size_t i=registers[1];heap[i]!=0;i++)putchar(heap[i]);
+                    break;
+                }
+                case VmCallList::EXIT: {
+                    exit(registers[instr.rd]);
+                }
+                }
+                break;
+            }
+            case OpCode::CALL: {
+                switch (static_cast<VmCallList>(instr.imm)) {
+                case VmCallList::CONSOLE_READ: {
+                    // registers[instr.rd] = getchar();
+                    break;
+                }
+                case VmCallList::CONSOLE_WRITE: {
+                    for (size_t i = registers[1]; heap[i] != 0; i++)
+                        putchar(heap[i]);
                     break;
                 }
                 case VmCallList::EXIT: {

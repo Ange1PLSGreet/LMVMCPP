@@ -31,9 +31,6 @@ namespace file_loader
         std::vector<uint8_t> symbolTableSegment;
     };
 
-    // 加载并验证文件
-    std::vector<uint8_t> loadAndValidateFile(const std::string &filename);
-
     // 加载完整的文件数据（包括所有段）
     FileData loadFullFileData(const std::string &filename);
 

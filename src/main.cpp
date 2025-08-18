@@ -45,8 +45,6 @@ int main(int argc, char *argv[])
                 // 移动索引
                 index += instr.size;
             }
-
-            // std::cout << program.size() << " instructions loaded" << "\n";
         } catch (const std::exception &e) {
             std::cerr << "Error: " << e.what() << "\n";
             return 1;
