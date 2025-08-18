@@ -10,17 +10,23 @@ int main(int argc, char *argv[])
 {
     auto start_time = std::chrono::high_resolution_clock::now();
     RegisterVM vm;
-    // 创建并运行示例程序
+
+    
+    std::vector<opcode::Instruction> func = { //一个示例方法
+        {.op = opcode::OpCode::NEW, .data={'T','h','i','s',' ','i','s',' ','f','u','n','c',10,0}},
+        {.op = opcode::OpCode::MOVRI, .rd = 1, .imm = 15},
+        {.op = opcode::OpCode::VMCALL, .imm=1},
+        {.op = opcode::OpCode::HALT}
+    };
+    auto func1 = vm.newFunc(func);
+
+
+    // 创建并运行示例程序(入口)
     std::vector<opcode::Instruction> program = {
-        {.op = opcode::OpCode::NEW, .data = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!', 10, 0}},
-        {.op = opcode::OpCode::MOVRM, .rd = 1, .imm = 1},
-        {.op = opcode::OpCode::VMCALL, .imm = 1},
-        {.op = opcode::OpCode::NEW, .data = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!', 10, 0}},
-        {.op = opcode::OpCode::MOVRM, .rd = 1, .imm = 15},
-        {.op = opcode::OpCode::VMCALL, .imm = 1},
-        {.op = opcode::OpCode::NEW, .data = {'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '!', 10, 0}},
-        {.op = opcode::OpCode::MOVRM, .rd = 1, .imm = 29},
-        {.op = opcode::OpCode::VMCALL, .imm = 1},
+        {.op = opcode::OpCode::NEW, .data={'H','e','l','l','o',' ','W','o','r','l','d','!',10,0}},
+        {.op = opcode::OpCode::MOVRI, .rd = 1, .imm = 1},
+        {.op = opcode::OpCode::VMCALL, .imm=1},
+        {.op = opcode::OpCode::CALL, .imm = static_cast<int64_t>(func1)},
     };
     // 如果提供了文件名参数，则加载并执行文件
     if (argc == 2) {
@@ -84,4 +90,5 @@ int main(int argc, char *argv[])
     double milliseconds = duration.count() / 1000000.0;
     std::cout << "Execution time: " << milliseconds << "ms\n";
     return 0;
+
 }
