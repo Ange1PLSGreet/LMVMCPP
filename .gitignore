@@ -43,3 +43,6 @@
 CMakeFiles/
 build/
 .xmake/
+
+.vscode/
+.idea/
