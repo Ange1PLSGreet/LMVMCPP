@@ -41,6 +41,7 @@ public:
     }
     size_t newFunc(const std::vector<opcode::Instruction>& program); // 创建一个函数
 private:
+    std::vector<std::vector<opcode::Instruction>> FuncLists; // 函数列表
     int64_t registers[NUM_REGS]; // r0 ~ r9
     std::vector<int8_t> heap;    // 堆
     int64_t heap_ptr = 1;        // 堆指针
@@ -58,3 +59,4 @@ private:
     void file_close(int64_t fd);
 
 };
+
