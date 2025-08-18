@@ -39,7 +39,7 @@ public:
             execute(instr);
         }
     }
-    
+    size_t newFunc(const std::vector<opcode::Instruction>& program); // 创建一个函数
 private:
     int64_t registers[NUM_REGS]; // r0 ~ r9
     std::vector<int8_t> heap;    // 堆
@@ -56,4 +56,5 @@ private:
     std::vector<int8_t> file_read(int64_t fd, size_t count);
     void file_write(int64_t fd, const std::vector<int8_t>& data);
     void file_close(int64_t fd);
+
 };
