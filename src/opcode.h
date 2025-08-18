@@ -26,12 +26,6 @@ namespace opcode {
         NEW,FUNC,CALL,LOOP,RET,
 
         IF , ELSE, ENDIF,
-        
-        // 文件操作指令
-        FOPEN,     // 打开文件
-        FREAD,     // 读取文件
-        FWRITE,    // 冫入文件
-        FCLOSE     // 关闭文件
     };
 
     // 定义一个映射表，键为操作码，值为一个三元组表示(hasDstOffset, hasSrcOffset, hasImmediate)
@@ -68,5 +62,6 @@ namespace opcode {
         long long key = &value; //地址
         T value;       //值
     };
+
 
 } // namespace opcode
