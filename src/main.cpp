@@ -1,38 +1,67 @@
-#include "file_loader.h"
-#include "opcode.h"
-#include "vm/vm.h"
+#include "file_loader.hpp"
+#include "opcode.hpp"
+#include "vm/vm.hpp"
 #include <chrono>
+#include <cstddef>
 #include <iomanip>
 #include <iostream>
+#include <string>
 #include <vector>
 
+/**
+ *
+ * @param argc 临时测试
+ * @param argv
+ * @return
+ */
 int main(int argc, char *argv[])
 {
-    auto start_time = std::chrono::high_resolution_clock::now();
     RegisterVM vm;
 
-    
-    std::vector<opcode::Instruction> func = { //一个示例方法
-        {.op = opcode::OpCode::NEW, .data={'T','h','i','s',' ','i','s',' ','f','u','n','c',10,0}},
-        {.op = opcode::OpCode::MOVRI, .rd = 1, .imm = 15},
-        {.op = opcode::OpCode::VMCALL, .imm=1},
-        {.op = opcode::OpCode::HALT}
+    std::vector<OpCodeImpl::Instruction> fib = {
+    {.op = OpCodeImpl::OpCode::MOVRI, .rd = 1, .imm = 1},        // r1 = 1
+    {.op = OpCodeImpl::OpCode::IFRR, .rd = 9, .rs = 1,.imm = 0, .data = {5}, .size = 19000}, // if n <= 1 (5 = LE)
+
+    // 递归计算 fib(n-1)
+    {.op = OpCodeImpl::OpCode::MOVRR, .rd = 10, .rs = 9},       // r10 = n (保存原始值)
+    {.op = OpCodeImpl::OpCode::SUBI, .rd = 9, .imm = 1},        // n-1
+    {.op = OpCodeImpl::OpCode::CALL, .imm = 0},                 // fib(n-1)
+    {.op = OpCodeImpl::OpCode::MOVRR, .rd = 11, .rs = 0},       // r11 = fib(n-1) (保存结果)
+
+    // 递归计算 fib(n-2)
+    {.op = OpCodeImpl::OpCode::MOVRR, .rd = 9, .rs = 10},       // 恢复原始n
+    {.op = OpCodeImpl::OpCode::SUBI, .rd = 9, .imm = 2},        // n-2
+    {.op = OpCodeImpl::OpCode::CALL, .imm = 0},                 // fib(n-2)
+
+    // 相加并返回: return fib(n-1) + fib(n-2)
+    {.op = OpCodeImpl::OpCode::ADDR, .rd = 0, .rs = 11},        // r0 = fib(n-2) + fib(n-1)
+    {.op = OpCodeImpl::OpCode::RET},
+
+    // 基础情况处理 (放在最后)
+    {.op = OpCodeImpl::OpCode::MOVRR, .rd = 0, .rs = 9},        // r0 = n (返回值)
+    {.op = OpCodeImpl::OpCode::RET}
     };
-    auto func1 = vm.newFunc(func);
+
+// 基础情况块 (单独注册)
+    std::vector<OpCodeImpl::Instruction> base_case = {
+        {.op = OpCodeImpl::OpCode::MOVRR, .rd = 0, .rs = 9},
+        {.op = OpCodeImpl::OpCode::RET}
+    };
+    vm.newFunc(fib);
+    vm.newCall(base_case);
 
 
     // 创建并运行示例程序(入口)
-    std::vector<opcode::Instruction> program = {
-        {.op = opcode::OpCode::NEW, .data={'H','e','l','l','o',' ','W','o','r','l','d','!',10,0}},
-        {.op = opcode::OpCode::MOVRI, .rd = 1, .imm = 1},
-        {.op = opcode::OpCode::VMCALL, .imm=1},
-        {.op = opcode::OpCode::CALL, .imm = static_cast<int64_t>(func1)},
+    std::vector<OpCodeImpl::Instruction> program = {
+        {.op = OpCodeImpl::OpCode::MOVRI, .rd = 9, .imm = 30},
+        {.op = OpCodeImpl::OpCode::CALL, .imm = 0},
     };
+
     // 如果提供了文件名参数，则加载并执行文件
     if (argc == 2) {
         program = {};
         try {
-            file_loader::FileData fd = file_loader::loadFullFileData(argv[1]);
+            FileLoader::FileData fd = FileLoader::loadFullFileData(argv[1]);
 
             // 使用索引遍历代码段，避免使用低效的erase操作
             std::size_t index = 0;
@@ -43,7 +72,7 @@ int main(int argc, char *argv[])
                 std::vector<uint8_t> remainingBytes(fd.codeSegment.begin() + index, fd.codeSegment.end());
 
                 // 解码指令
-                opcode::Instruction instr;
+                OpCodeImpl:: Instruction instr;
                 instr.decode(remainingBytes);
                 // 将指令添加到程序中
                 program.push_back(instr);
@@ -56,11 +85,18 @@ int main(int argc, char *argv[])
             return 1;
         }
     } else if (argc == 1) {
+        auto start_time = std::chrono::high_resolution_clock::now();
         try {
             vm.run(program);
         } catch (const std::exception &e) {
             std::cerr << "VM Error: " << e.what() << "\n";
         }
+        auto end_time = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
+        double milliseconds = duration.count() / 1000000.0;
+        std::cout << "Execution time: " << milliseconds << "ms\n";
+        std::cout << vm.registers[0] << "\n";
+
     } else if (argc == 3) {
         std::string filename = argv[1];
         // 创建测试文件
@@ -79,16 +115,12 @@ int main(int argc, char *argv[])
         }
 
         // 写入文件头
-        file_loader::writeFileHeader(file, testCode.size(), program.size());
+        FileLoader::writeFileHeader(file, testCode.size(), program.size());
 
         file.write(reinterpret_cast<char *>(testCode.data()), testCode.size());
 
         file.close();
     }
-    auto end_time = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
-    double milliseconds = duration.count() / 1000000.0;
-    std::cout << "Execution time: " << milliseconds << "ms\n";
-    return 0;
 
+    return 0;
 }
