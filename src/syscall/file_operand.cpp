@@ -6,7 +6,9 @@
 ********************************************************/
 #include "file_operand.hpp"
 #include "../vm/vm.hpp"
+#ifndef _WIN32
 #include <sys/syscall.h>
+#endif
 #include <unistd.h>
 #include <fcntl.h>
 
