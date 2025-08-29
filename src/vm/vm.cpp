@@ -106,7 +106,7 @@ void RegisterVM::run(const std::vector<OpCodeImpl::Instruction>& program){
                 break;
             }
             case OpCodeImpl::OpCode::IFRR: {
-                if(cmp_if_bool<int64_t,int64_t>(instr_ptr->data[0],registers[instr_ptr->rd],registers[instr_ptr->rs])) {
+                if(cmpIfBool<int64_t,int64_t>(instr_ptr->data[0],registers[instr_ptr->rd],registers[instr_ptr->rs])) {
                     run(CallLists[instr_ptr->imm]);
                     if(instr_ptr->size == 19000)return; //临时定义一个用于返回的跳转
                 }
@@ -135,17 +135,12 @@ void RegisterVM::run(const std::vector<OpCodeImpl::Instruction>& program){
     }
 }
 
-template<typename T1,typename T2>
-bool RegisterVM::cmp_if_bool(int8_t bool_cmp, T1 left, T2 right){
-        switch (bool_cmp){
-            case 0: return left == right;
-            case 1: return left != right;
-            case 2: return left > right;
-            case 3: return left < right;
-            case 4: return left >= right;
-            case 5: return left <= right;
-            default: throw std::runtime_error("Unknown bool_cmp");
-        }
+template<typename T1, typename T2>
+[[gnu::always_inline]] bool RegisterVM::cmpIfBool(int8_t bool_cmp, T1 left, T2 right) {
+    if (bool_cmp < 0 || bool_cmp >= 6) {
+        throw std::runtime_error("Unknown bool_cmp");
+    }
+    return cmp_table<T1, T2>[bool_cmp](left, right);
 }
 
 size_t RegisterVM::newCall(const std::vector<OpCodeImpl::Instruction>& program){
@@ -154,7 +149,7 @@ size_t RegisterVM::newCall(const std::vector<OpCodeImpl::Instruction>& program){
     return index;
 }
 
-inline void RegisterVM::funcCalling(const OpCodeImpl::Instruction *instr) {
+[[gnu::always_inline]] void RegisterVM::funcCalling(const OpCodeImpl::Instruction *instr) {
     try {
         LocalState local_state;
         local_state.saveAllRegisters(registers);
@@ -189,5 +184,4 @@ inline void RegisterVM::registerUnionHandler(const OpCodeImpl::Instruction* inst
                                 ", valid range: 0-" + std::to_string(handler_count - 1));
     }
 }
-
 

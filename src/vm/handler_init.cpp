@@ -11,6 +11,7 @@
 Handler::Handler() {
     handlers = {
         [] { ConsoleIO::vmCallPrint(); },
-        [] { ConsoleIO::vmCallInput(); }
+        [] { ConsoleIO::vmCallInput(); },
+        [] { ConsoleIO::vmExit();      }
     };
 }

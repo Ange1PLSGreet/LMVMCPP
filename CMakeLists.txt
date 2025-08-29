@@ -7,6 +7,12 @@ project(lmvmcpp)
 # 添加FLTO开关选项，默认开启
 option(ENABLE_FLTO "Enable Link Time Optimization" ON)
 
+# 启用测试
+enable_testing()
+
+# 查找GTest
+find_package(GTest REQUIRED)
+
 set(CMAKE_CXX_STANDARD 20)
 if (ANDROID)
     # Android端不支持avx2指令集
@@ -58,4 +64,5 @@ add_executable(ConsoleIOTest
         src/opcode.hpp
 )
 
-target_link_libraries(ConsoleIOTest ${GTEST_LIBRARIES} pthread)
+# 链接GTest库
+target_link_libraries(ConsoleIOTest GTest::gtest GTest::gtest_main pthread)

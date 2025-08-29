@@ -5,6 +5,7 @@
 -     This project is followed GPL-3.0 license
 ********************************************************/
 #include "models.hpp"
+#include <cassert>
 
 TaggedVal TaggedUtil::encode_Smi(int64_t smi_val) {
     return (static_cast<TaggedVal>(smi_val) << 3) | static_cast<TaggedVal>(TaggedType::Smi);

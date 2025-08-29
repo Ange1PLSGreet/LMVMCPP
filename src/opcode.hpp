@@ -28,9 +28,9 @@ public:
         MULR, MULM, MULI,
         DIVR, DIVM, DIVI,
 
-        NEW,CALL,LOOP,RET,
+        NEW,CALL, RET,
 
-        IFRR, IFRI, ELSE, ENDIF,
+        IFRR, IFRI,
     };
 
     // =========================
@@ -55,7 +55,7 @@ public:
          * 编码方法
          * @return std::vector<uint8_t>
          */
-        std::vector<uint8_t> encode() const;
+        [[nodiscard]] std::vector<uint8_t> encode() const;
         /**
          * 解码方法
          * @param bytes

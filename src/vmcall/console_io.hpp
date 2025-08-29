@@ -23,6 +23,12 @@ public:
     static void vmCallInput();
 
     /**
+     * 虚拟机退出
+     * @return void
+     */
+    static void vmExit();
+
+    /**
      * Override
      * @param code
      * @param func_name

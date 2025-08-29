@@ -28,3 +28,11 @@ void ConsoleIO::vmCallInput() {
         Handler::current_vm->heap[addr + input.length()] = 0;
     };
 }
+
+void ConsoleIO::vmExit() {
+    RegisterVM::vm_call_handlers[2] = [](const OpCodeImpl::Instruction*) {
+        const size_t addr = Handler::current_vm->registers[9];
+        const int exit_code = static_cast<uint8_t>(Handler::current_vm->heap[addr]);
+        exit(exit_code);
+    };
+}

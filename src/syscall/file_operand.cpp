@@ -12,8 +12,8 @@
 #endif
 #include <fcntl.h>
 
-int FileOperand::openFile(const char* name) {
 #ifdef __linux__
+int FileOperand::openFile(const char* name) {
 #ifdef __ANDROID__
     long fd = syscall(SYS_openat, AT_FDCWD, name, O_RDONLY, 0);
 #else
@@ -25,22 +25,18 @@ int FileOperand::openFile(const char* name) {
         return -1;
     }
     return 0;
-#endif
 }
 
 int FileOperand::closeFile(long fd) {
-#ifdef __linux__
     long ret = syscall(SYS_close, fd);
     if (ret < 0) {
         SyscallErrnoOut(ret, "closeFile");
         return -1;
     }
     return 0;
-#endif
 }
 
 int FileOperand::writeFile(long fd, const char *data, size_t size) {
-#ifdef __linux__
     // 分块写入
     size_t written = 0;
     while (written < size) {
@@ -53,12 +49,10 @@ int FileOperand::writeFile(long fd, const char *data, size_t size) {
         written += ret;
     }
     return 0;
-#endif
 }
 
 // 辅助函数
 bool FileOperand::copyToBuffer(const char* data, size_t size) {
-#ifdef __linux__
     if (buffer_size < size) {
         delete[] buffer;
         buffer = new (std::nothrow) char[size];
@@ -72,11 +66,9 @@ bool FileOperand::copyToBuffer(const char* data, size_t size) {
 
     std::memcpy(buffer, data, size);
     return true;
-#endif
 }
 
 int FileOperand::readFile(long fd, char *data, size_t size) {
-#ifdef __linux__
     size_t total_read = 0;
     while (total_read < size) {
         ssize_t ret = syscall(SYS_read, fd, data + total_read, size - total_read);
@@ -95,5 +87,5 @@ int FileOperand::readFile(long fd, char *data, size_t size) {
     }
 
     return static_cast<int>(total_read);
-#endif
 }
+#endif

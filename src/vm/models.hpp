@@ -8,7 +8,6 @@
 
 #include <cstdint>
 #include <cstring>
-#include <cassert>
 #include <vector>
 
 class LmHeapObject;
@@ -23,7 +22,7 @@ enum class TaggedType : unsigned char {
 };
 
 // 64位TaggedVal：低3位为类型标记，高55位为数据
-using TaggedVal = unsigned long long;
+using TaggedVal = long long;
 
 class TaggedUtil {
 public:

@@ -8,7 +8,6 @@
 #include "../opcode.hpp"
 #include <iostream>
 #include <functional>
-
 #include <vector>
 #include <cstring>
 #include <fstream>
@@ -50,7 +49,7 @@ public:
      * 存储所有寄存器值
      * @param registers
      */
-    void saveAllRegisters(int64_t* registers);
+    void saveAllRegisters(const int64_t* registers);
     /**
      * 设置返回值
      * @param value
@@ -138,7 +137,7 @@ protected:
     * @return
     */
     template<typename T1,typename T2>
-    static bool cmp_if_bool(int8_t bool_cmp, T1 left, T2 right);
+    static bool cmpIfBool(int8_t bool_cmp, T1 left, T2 right);
     std::vector<std::vector<OpCodeImpl::Instruction>> FuncLists; // 函数列表
     std::vector<std::vector<OpCodeImpl::Instruction>> CallLists; // 控制流跳转所用的，避免与FuncLists混淆
     /**
@@ -153,4 +152,73 @@ protected:
      * @return void
      */
     void newOnHeap(const OpCodeImpl::Instruction* instr);
+
+
+    template<typename T1, typename T2>
+    using CmpFunc = bool(*)(T1, T2); // 比较函数指针
+
+    /** 比较函数 **/
+    template<typename T1, typename T2>
+    /**
+     * 比较值相等
+     * @param left
+     * @param right
+     * @return bool
+     */
+    static bool cmpEq(T1 left, T2 right) { return left == right; }
+
+    template<typename T1, typename T2>
+    /**
+     * 比较值不相等
+     * @param left
+     * @param right
+     * @return bool
+     */
+    static bool cmpNe(T1 left, T2 right) { return left != right; }
+
+    template<typename T1, typename T2>
+    /**
+     * 比较值大于
+     * @param left
+     * @param right
+     * @return bool
+     */
+    static bool cmpGt(T1 left, T2 right) { return left > right; }
+
+    template<typename T1, typename T2>
+    /**
+     * 比较值小于
+     * @param left
+     * @param right
+     * @return bool
+     */
+    static bool cmpLt(T1 left, T2 right) { return left < right; }
+
+    template<typename T1, typename T2>
+    /**
+     * 比较值大于等于
+     * @param left
+     * @param right
+     * @return bool
+     */
+    static bool cmpGe(T1 left, T2 right) { return left >= right; }
+
+    template<typename T1, typename T2>
+    /**
+     * 比较值小于等于
+     * @param left
+     * @param right
+     * @return bool
+     */
+    static bool cmpLe(T1 left, T2 right) { return left <= right; }
+
+    template<typename T1, typename T2>
+    static constexpr CmpFunc<T1, T2> cmp_table[] = {
+        cmpEq<T1, T2>,   // 0
+        cmpNe<T1, T2>,   // 1
+        cmpGt<T1, T2>,   // 2
+        cmpLt<T1, T2>,   // 3
+        cmpGe<T1, T2>,   // 4
+        cmpLe<T1, T2>    // 5
+    };
 };

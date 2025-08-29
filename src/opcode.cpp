@@ -47,7 +47,6 @@ std::unordered_map<OpCodeImpl::OpCode, std::tuple<bool, bool, bool> > OpCodeImpl
     // 控制流和函数相关指令
     {OpCode::NEW, {false, false, false}}, // 创建新对象，使用data字段
     {OpCode::CALL, {false, false, true}},
-    {OpCode::LOOP, {false, false, false}},
     {OpCode::RET, {false, false, false}},
 
     {OpCode::IFRR, {false, false, false}},
