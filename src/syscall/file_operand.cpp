@@ -8,8 +8,8 @@
 #include "../vm/vm.hpp"
 #ifndef _WIN32
 #include <sys/syscall.h>
-#endif
 #include <unistd.h>
+#endif
 #include <fcntl.h>
 
 int FileOperand::openFile(const char* name) {
