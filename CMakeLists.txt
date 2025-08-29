@@ -9,7 +9,8 @@ if (ANDROID)
     # Android端不支持avx2指令集
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -flto")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2 -O3 -march=native -flto")
+		# 暂时去掉优化, 有些编译器debug期不支持优化 -flto
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2 -O3 -march=native")
 endif()
 
 add_executable(LMVMCPP 
