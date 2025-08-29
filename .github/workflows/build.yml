@@ -39,12 +39,12 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build
+          sudo apt-get install -y build-essential cmake ninja-build libgtest-dev
 
       - name: Set up build environment (macOS)
         if: matrix.os == 'macos-latest'
         run: |
-          brew install cmake ninja
+          brew install cmake ninja googletest
 
       - name: Set up MSVC (Windows)
         if: matrix.os == 'windows-2025'
