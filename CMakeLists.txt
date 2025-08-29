@@ -10,8 +10,19 @@ option(ENABLE_FLTO "Enable Link Time Optimization" ON)
 # 启用测试
 enable_testing()
 
-# 查找GTest
-find_package(GTest REQUIRED)
+# 使用系统安装的 GTest，默认关闭
+option(USE_SYSTEM_GTEST "Use system-installed GTest instead of submodule" OFF)
+
+if (USE_SYSTEM_GTESTA)
+    # 查找GTest
+    find_package(GTest REQUIRED)
+else()
+    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/third_party/googletest")
+        message(FATAL_ERROR "googletest submodule not found, maybe enable USE_SYSTEM_GTEST to use system-installed GTest, or run \"git submodule update --init --recursive\" to solve this. ")
+    endif()
+    # 使用submodule里的GTest
+    add_subdirectory(third_party/googletest)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 if (ANDROID)
@@ -65,4 +76,8 @@ add_executable(ConsoleIOTest
 )
 
 # 链接GTest库
-target_link_libraries(ConsoleIOTest GTest::gtest GTest::gtest_main pthread)
+if (USE_SYSTEM_GTEST)
+    target_link_libraries(ConsoleIOTest GTest::gtest GTest::gtest_main pthread)
+else()
+    target_link_libraries(ConsoleIOTest gtest gtest_main pthread)
+endif()
