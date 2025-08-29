@@ -12,7 +12,11 @@
 
 int FileOperand::openFile(const char* name) {
 #ifdef __linux__
+#ifdef __ANDROID__
+    long fd = syscall(SYS_openat, AT_FDCWD, name, O_RDONLY, 0);
+#else
     long fd = syscall(SYS_open, name, O_RDONLY, 0);
+#endif
     if (fd < 0) {
         std::cerr << "VM Error: " << "System Calling Failed For <<  \"openFile\" << File Description: " <<
             fd << std::endl;

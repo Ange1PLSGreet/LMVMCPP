@@ -37,7 +37,7 @@
 *.out
 *.app
 
-# debug information files
+# Debug information files
 *.dwo
 
 CMakeFiles/
@@ -46,3 +46,7 @@ build/
 
 .vscode/
 .idea/
+
+# Cache fils
+.cache
+
