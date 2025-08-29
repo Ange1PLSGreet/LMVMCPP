@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.16.3)
 project(lmvmcpp)
 
 # 添加FLTO开关选项，默认关闭
-option(ENABLE_FLTO "Enable Link Time Optimization" ON)
+option(ENABLE_FLTO "Enable Link Time Optimization" OFF)
 
 # 启用测试
 enable_testing()

@@ -13,7 +13,12 @@
 constexpr size_t REG_CHUNK_SIZE = 4;
 constexpr size_t NUM_AVX_CHUNKS = (NUM_REGS + REG_CHUNK_SIZE - 1) / REG_CHUNK_SIZE;
 
-[[gnu::always_inline]] bool is_aligned(const void* ptr, size_t alignment) {
+#ifdef __GNUC__
+[[gnu::always_inline]]
+#else
+inline
+#endif
+bool is_aligned(const void* ptr, size_t alignment) {
     return (reinterpret_cast<uintptr_t>(ptr) & (alignment - 1)) == 0;
 }
 

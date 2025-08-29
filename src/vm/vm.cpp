@@ -136,7 +136,12 @@ void RegisterVM::run(const std::vector<OpCodeImpl::Instruction>& program){
 }
 
 template<typename T1, typename T2>
-[[gnu::always_inline]] bool RegisterVM::cmpIfBool(int8_t bool_cmp, T1 left, T2 right) {
+#ifdef __GNUC__
+[[gnu::always_inline]]
+#else
+inline
+#endif
+bool RegisterVM::cmpIfBool(int8_t bool_cmp, T1 left, T2 right) {
     if (bool_cmp < 0 || bool_cmp >= 6) {
         throw std::runtime_error("Unknown bool_cmp");
     }
@@ -149,7 +154,12 @@ size_t RegisterVM::newCall(const std::vector<OpCodeImpl::Instruction>& program){
     return index;
 }
 
-[[gnu::always_inline]] void RegisterVM::funcCalling(const OpCodeImpl::Instruction *instr) {
+#ifdef __GNUC__
+[[gnu::always_inline]]
+#else
+inline
+#endif
+void RegisterVM::funcCalling(const OpCodeImpl::Instruction *instr) {
     try {
         LocalState local_state;
         local_state.saveAllRegisters(registers);
