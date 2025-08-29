@@ -169,6 +169,7 @@ inline void RegisterVM::funcCalling(const OpCodeImpl::Instruction *instr) {
 
 inline void RegisterVM::newOnHeap(const OpCodeImpl::Instruction *instr) {
     if(instr->data.empty()) vm_error(*instr);
+    registers[1] = heap.size();
     heap.reserve(heap.size() + instr->data.size());
     heap.insert(heap.end(),instr->data.begin(),instr->data.end());
 }
@@ -188,4 +189,5 @@ inline void RegisterVM::registerUnionHandler(const OpCodeImpl::Instruction* inst
                                 ", valid range: 0-" + std::to_string(handler_count - 1));
     }
 }
+
 
