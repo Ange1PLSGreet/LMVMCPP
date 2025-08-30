@@ -9,7 +9,6 @@
 #include <string>
 
 std::map<uint8_t, std::function<void(const OpCodeImpl::Instruction*)>> RegisterVM::vm_call_handlers;
-
 #ifdef _MSC_VER
 template<typename T1, typename T2>
 const typename RegisterVM::CmpFunc<T1, T2> RegisterVM::cmp_table[6] = {
@@ -22,7 +21,14 @@ const typename RegisterVM::CmpFunc<T1, T2> RegisterVM::cmp_table[6] = {
 };
 
 template<>
-const RegisterVM::CmpFunc<int64_t, int64_t> RegisterVM::cmp_table<int64_t, int64_t>[6];
+const RegisterVM::CmpFunc<int64_t, int64_t> RegisterVM::cmp_table<int64_t, int64_t>[6] = {
+    RegisterVM::cmpEq<int64_t, int64_t>,
+    RegisterVM::cmpNe<int64_t, int64_t>,
+    RegisterVM::cmpGt<int64_t, int64_t>,
+    RegisterVM::cmpLt<int64_t, int64_t>,
+    RegisterVM::cmpGe<int64_t, int64_t>,
+    RegisterVM::cmpLe<int64_t, int64_t>
+};
 #endif
 
 void RegisterVM::vm_error(const OpCodeImpl::Instruction& instr) {
