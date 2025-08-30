@@ -15,6 +15,15 @@
 #include <memory>
 
 // =========================
+// 添加宏定义
+// =========================
+#ifdef _MSC_VER
+#define __builtin_expect(EXP, C)  (EXP)// 实现gcc/clang自带函数
+#endif
+
+
+
+// =========================
 // 定义寄存器数量
 // =========================
 constexpr uint8_t NUM_REGS = 15; // r0 ~ r14
@@ -213,7 +222,7 @@ protected:
     static bool cmpLe(T1 left, T2 right) { return left <= right; }
 
     template<typename T1, typename T2>
-    static constexpr CmpFunc<T1, T2> cmp_table[] = {
+    static inline constexpr CmpFunc<T1, T2> cmp_table[] = {
         cmpEq<T1, T2>,   // 0
         cmpNe<T1, T2>,   // 1
         cmpGt<T1, T2>,   // 2

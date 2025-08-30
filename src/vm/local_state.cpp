@@ -61,7 +61,11 @@ void LocalState::saveAllRegisters(const int64_t *registers) {
         }
     }
 #else
+    #ifdef _MSC_VER
+    #pragma loop(ivdep)
+    #else
     #pragma unroll(4)
+    #endif
     for (int i = 0; i < NUM_REGS; ++i) {
         saved_registers.regs[i] = registers[i];
     }
@@ -102,7 +106,11 @@ void LocalState::restoreAllRegisters(int64_t *registers) {
         }
     }
 #else
+    #ifdef _MSC_VER
+    #pragma loop(ivdep)
+    #else
     #pragma unroll(4)
+    #endif
     for (int i = 0; i < NUM_REGS; ++i) {
         registers[i] = saved_registers.regs[i];
     }
