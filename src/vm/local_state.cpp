@@ -13,12 +13,21 @@
 constexpr size_t REG_CHUNK_SIZE = 4;
 constexpr size_t NUM_AVX_CHUNKS = (NUM_REGS + REG_CHUNK_SIZE - 1) / REG_CHUNK_SIZE;
 
-[[gnu::always_inline]] bool is_aligned(const void* ptr, size_t alignment) {
+#ifdef __GNUC__
+[[gnu::always_inline]]
+#else
+inline
+#endif
+bool is_aligned(const void* ptr, size_t alignment) {
     return (reinterpret_cast<uintptr_t>(ptr) & (alignment - 1)) == 0;
 }
 
 void LocalState::saveRegister(const int64_t *registers, uint8_t reg_index) {
+#ifdef __GNUC__
     if (__builtin_expect((reg_index < NUM_REGS) && !(reg_mask & (1ULL << reg_index)), 1)) {
+#else
+    if ((reg_index < NUM_REGS) && !(reg_mask & (1ULL << reg_index))) {
+#endif
         saved_registers.regs[reg_index] = registers[reg_index];
         reg_mask |= (1ULL << reg_index);
     }
@@ -42,7 +51,11 @@ void LocalState::saveAllRegisters(const int64_t *registers) {
             , ...);
         };
         // 检查对齐
+#ifdef __GNUC__
         if (__builtin_expect(is_aligned(registers, 32) && is_aligned(saved_registers.regs, 32), 1)) {
+#else
+        if (is_aligned(registers, 32) && is_aligned(saved_registers.regs, 32)) {
+#endif
             copy_avx(std::make_index_sequence<NUM_AVX_CHUNKS>());
         } else {
             // 非对齐复制
@@ -61,11 +74,9 @@ void LocalState::saveAllRegisters(const int64_t *registers) {
         }
     }
 #else
-    #ifdef _MSC_VER
-    #pragma loop(ivdep)
-    #else
-    #pragma unroll(4)
-    #endif
+#ifndef _MSC_VER
+#pragma unroll(4)
+#endif
     for (int i = 0; i < NUM_REGS; ++i) {
         saved_registers.regs[i] = registers[i];
     }
@@ -88,7 +99,11 @@ void LocalState::restoreAllRegisters(int64_t *registers) {
             , ...);
         };
 
+#ifdef __GNUC__
         if (__builtin_expect(is_aligned(registers, 32) && is_aligned(saved_registers.regs, 32), 1)) {
+#else
+        if (is_aligned(registers, 32) && is_aligned(saved_registers.regs, 32)) {
+#endif
             copy_avx(std::make_index_sequence<NUM_AVX_CHUNKS>());
         } else {
             auto copy_avx_unaligned = [&]<size_t... I>(std::index_sequence<I...>) {
@@ -106,11 +121,9 @@ void LocalState::restoreAllRegisters(int64_t *registers) {
         }
     }
 #else
-    #ifdef _MSC_VER
-    #pragma loop(ivdep)
-    #else
-    #pragma unroll(4)
-    #endif
+#ifndef _MSC_VER
+#pragma unroll(4)
+#endif
     for (int i = 0; i < NUM_REGS; ++i) {
         registers[i] = saved_registers.regs[i];
     }

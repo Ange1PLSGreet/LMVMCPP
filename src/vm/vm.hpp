@@ -15,15 +15,6 @@
 #include <memory>
 
 // =========================
-// 添加宏定义
-// =========================
-#ifdef _MSC_VER
-#define __builtin_expect(EXP, C)  (EXP)// 实现gcc/clang自带函数
-#endif
-
-
-
-// =========================
 // 定义寄存器数量
 // =========================
 constexpr uint8_t NUM_REGS = 15; // r0 ~ r14
@@ -221,8 +212,9 @@ protected:
      */
     static bool cmpLe(T1 left, T2 right) { return left <= right; }
 
+#ifdef __GNUC__
     template<typename T1, typename T2>
-    static inline constexpr CmpFunc<T1, T2> cmp_table[] = {
+    static constexpr CmpFunc<T1, T2> cmp_table[] = {
         cmpEq<T1, T2>,   // 0
         cmpNe<T1, T2>,   // 1
         cmpGt<T1, T2>,   // 2
@@ -230,4 +222,18 @@ protected:
         cmpGe<T1, T2>,   // 4
         cmpLe<T1, T2>    // 5
     };
+#elif _MSC_VER
+    template<typename T1, typename T2>
+    static const CmpFunc<T1, T2> cmp_table[6];
+#else
+    template<typename T1, typename T2>
+    static constexpr CmpFunc<T1, T2> cmp_table[] = {
+        cmpEq<T1, T2>,   // 0
+        cmpNe<T1, T2>,   // 1
+        cmpGt<T1, T2>,   // 2
+        cmpLt<T1, T2>,   // 3
+        cmpGe<T1, T2>,   // 4
+        cmpLe<T1, T2>    // 5
+    };
+#endif
 };
