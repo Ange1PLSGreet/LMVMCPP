@@ -12,7 +12,7 @@ std::map<uint8_t, std::function<void(const OpCodeImpl::Instruction*)>> RegisterV
 
 #ifdef _MSC_VER
 template<typename T1, typename T2>
-const typename RegisterVM::CmpFunc<T1, T2> RegisterVM::cmp_table<T1, T2>[6] = {
+const typename RegisterVM::CmpFunc<T1, T2> RegisterVM::cmp_table[6] = {
     RegisterVM::cmpEq<T1, T2>,
     RegisterVM::cmpNe<T1, T2>,
     RegisterVM::cmpGt<T1, T2>,
