@@ -10,6 +10,20 @@
 
 std::map<uint8_t, std::function<void(const OpCodeImpl::Instruction*)>> RegisterVM::vm_call_handlers;
 
+#ifdef _MSC_VER
+template<typename T1, typename T2>
+const typename RegisterVM::CmpFunc<T1, T2> RegisterVM::cmp_table<T1, T2>[6] = {
+    &RegisterVM::cmpEq<T1, T2>,
+    &RegisterVM::cmpNe<T1, T2>,
+    &RegisterVM::cmpGt<T1, T2>,
+    &RegisterVM::cmpLt<T1, T2>,
+    &RegisterVM::cmpGe<T1, T2>,
+    &RegisterVM::cmpLe<T1, T2>
+};
+
+template const RegisterVM::CmpFunc<int64_t, int64_t> RegisterVM::cmp_table<int64_t, int64_t>[6];
+#endif
+
 void RegisterVM::vm_error(const OpCodeImpl::Instruction& instr) {
     std::cout << "VM Error: ";
     if (instr.rd >= NUM_REGS || instr.rs >= NUM_REGS)
@@ -174,7 +188,7 @@ void RegisterVM::funcCalling(const OpCodeImpl::Instruction *instr) {
 
 inline void RegisterVM::newOnHeap(const OpCodeImpl::Instruction *instr) {
     if(instr->data.empty()) vm_error(*instr);
-    registers[1] = heap.size();
+    registers[1] = static_cast<int64_t>(heap.size());
     heap.reserve(heap.size() + instr->data.size());
     heap.insert(heap.end(),instr->data.begin(),instr->data.end());
 }
@@ -194,4 +208,3 @@ inline void RegisterVM::registerUnionHandler(const OpCodeImpl::Instruction* inst
                                 ", valid range: 0-" + std::to_string(handler_count - 1));
     }
 }
-
