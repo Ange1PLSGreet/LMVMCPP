@@ -224,6 +224,16 @@ protected:
     };
 #elif _MSC_VER
     template<typename T1, typename T2>
-    constexpr typename RegisterVM::CmpFunc<T1, T2> RegisterVM::cmp_table<T1, T2>[6];
+    static const CmpFunc<T1, T2> cmp_table[6];
+#else
+    template<typename T1, typename T2>
+    static constexpr CmpFunc<T1, T2> cmp_table[] = {
+        cmpEq<T1, T2>,   // 0
+        cmpNe<T1, T2>,   // 1
+        cmpGt<T1, T2>,   // 2
+        cmpLt<T1, T2>,   // 3
+        cmpGe<T1, T2>,   // 4
+        cmpLe<T1, T2>    // 5
+    };
 #endif
 };
