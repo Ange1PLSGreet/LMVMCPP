@@ -13,7 +13,7 @@ enable_testing()
 # 使用系统安装的 GTest，默认关闭
 option(USE_SYSTEM_GTEST "Use system-installed GTest instead of submodule" OFF)
 
-if (USE_SYSTEM_GTESTA)
+if (USE_SYSTEM_GTEST)
     # 查找GTest
     find_package(GTest REQUIRED)
 else()
@@ -24,8 +24,20 @@ else()
     add_subdirectory(third_party/googletest)
 endif()
 
+# 设置c++标准
 set(CMAKE_CXX_STANDARD 20)
-if (ANDROID)
+
+if (MSVC)
+    # 添加异常处理标志
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+    if (ENABLE_FLTO)
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Ox /GL")# MSVC的LTO
+    else()
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Ox")
+    endif()
+    # MSVC 不支持 -mavx2，使用以下方式
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
+elseif (ANDROID)
     # Android端不支持avx2指令集
     if (ENABLE_FLTO)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -flto")
@@ -57,7 +69,6 @@ add_executable(LMVMCPP
         src/vm/models.hpp
         src/vm/handler_init.cpp
         src/vmcall/console_io.cpp
-        src/vm/handler.cpp
         src/syscall/file_operand.hpp
 )
 
@@ -77,7 +88,12 @@ add_executable(ConsoleIOTest
 
 # 链接GTest库
 if (USE_SYSTEM_GTEST)
-    target_link_libraries(ConsoleIOTest GTest::gtest GTest::gtest_main pthread)
+    target_link_libraries(ConsoleIOTest GTest::gtest GTest::gtest_main)
 else()
-    target_link_libraries(ConsoleIOTest gtest gtest_main pthread)
+    target_link_libraries(ConsoleIOTest gtest gtest_main)
+endif()
+
+# 只有UNIX才链接pthread
+if(UNIX)
+    target_link_libraries(ConsoleIOTest pthread)
 endif()
