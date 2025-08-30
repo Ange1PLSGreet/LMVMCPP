@@ -27,6 +27,15 @@ endif()
 # 设置c++标准
 set(CMAKE_CXX_STANDARD 20)
 
+# 检查是否支持-mavx2
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
+if (COMPILER_SUPPORTS_AVX2)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
+endif()
+
+
+# 添加编译器选项
 if (MSVC)
     # 添加异常处理标志
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
@@ -37,19 +46,12 @@ if (MSVC)
     endif()
     # MSVC 不支持 -mavx2，使用以下方式
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
-elseif (ANDROID)
-    # Android端不支持avx2指令集
+else()
+    # 暂时去掉优化, 有些编译器debug期不支持优化 -flto
     if (ENABLE_FLTO)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -flto")
     else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
-    endif()
-else()
-    # 暂时去掉优化, 有些编译器debug期不支持优化 -flto
-    if (ENABLE_FLTO)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2 -O3 -march=native -flto")
-    else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2 -O3 -march=native")
     endif()
 endif()
 
