@@ -21,7 +21,8 @@ const typename RegisterVM::CmpFunc<T1, T2> RegisterVM::cmp_table[6] = {
     RegisterVM::cmpLe<T1, T2>
 };
 
-template const RegisterVM::CmpFunc<int64_t, int64_t> RegisterVM::cmp_table<int64_t, int64_t>[6];
+template<>
+const RegisterVM::CmpFunc<int64_t, int64_t> RegisterVM::cmp_table<int64_t, int64_t>[6];
 #endif
 
 void RegisterVM::vm_error(const OpCodeImpl::Instruction& instr) {
