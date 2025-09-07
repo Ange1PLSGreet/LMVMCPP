@@ -214,11 +214,13 @@ public:
     };
 
 private:
-    CodeType code_type_; // 指向代码类型枚举
-    std::vector<int> code_; // 指向字节码或机器码
+    CodeType code_type_; // 代码类型枚举
+    std::vector<int> code_; // 字节码或机器码
+    std::unordered_map<int,int> jmp_table_; // switch跳转表
+    std::vector<LmHeapObject*> consts_      ; // 常量池
     void* machine_code_addr_; // 指向机器码地址
-    size_t machine_code_len_; // 指向机器码长度
-    size_t size_; // 指向代码大小
+    size_t machine_code_len_; // 机器码长度
+    size_t size_; // 代码大小
 
 public:
     /**
