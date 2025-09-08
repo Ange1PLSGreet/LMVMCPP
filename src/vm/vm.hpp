@@ -1,11 +1,12 @@
 /******************************************************
--     Date:  2025.08.28 15:35
--     File:  vm.hpp
+-     Date: 2025.08.28 15:35
+-     File: vm.hpp
 -     CopyRight Lamina Team
 -     This project is followed GPL-3.0 license
 ********************************************************/
 #pragma once
 #include "../opcode.hpp"
+#include "models.hpp"
 #include <iostream>
 #include <functional>
 #include <vector>
@@ -74,6 +75,10 @@ private:
     int64_t return_value;
 };
 
+// 前向声明HandlerFunction模板
+template<size_t N>
+struct HandlerFunction;
+
 // =========================
 // 寄存器式虚拟机
 // =========================
@@ -84,7 +89,7 @@ public:
      */
     virtual ~RegisterVM() = default;
     int64_t registers[NUM_REGS]{}; // r0 ~ r14
-    std::vector<int8_t> heap;    // 堆
+    std::vector<LmHeapObject*> heap;    // 堆
 
     static std::map<uint8_t, std::function<void(const OpCodeImpl::Instruction*)>> vm_call_handlers; // VM调用分发器
     /**
@@ -93,7 +98,7 @@ public:
     RegisterVM() {
         // 初始化寄存器为 0
         std::memset(registers, 0, sizeof(registers));
-        heap.push_back(0);// 堆顶为 0
+        heap.push_back(nullptr);// 堆顶为 0
     }
     /**
      * 执行一组指令

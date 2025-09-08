@@ -12,7 +12,6 @@
 std::unordered_map<OpCodeImpl::OpCode, std::tuple<bool, bool, bool> > OpCodeImpl::opcodeFlagMap = {
     // 基本控制指令
     {OpCode::VMCALL, {false, false, true}},
-    {OpCode::SYSCALL, {false, false, false}},
     {OpCode::HALT, {false, false, false}},
     {OpCode::UNKNOWN, {false, false, false}},
 

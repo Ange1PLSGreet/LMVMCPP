@@ -67,15 +67,36 @@ void RegisterVM::run(const std::vector<OpCodeImpl::Instruction>& program){
                 break;
             }
             case OpCodeImpl::OpCode::MOVMI: {
-                heap[instr_ptr->mem] = static_cast<signed char>(instr_ptr->imm);
+                if (instr_ptr->mem < heap.size()) {
+                    if (heap[instr_ptr->mem] != nullptr) {
+                        heap[instr_ptr->mem]->del_ref();
+                    }
+                    auto* arr = new LmArray(1);
+                    arr->push(TaggedUtil::encode_Smi(instr_ptr->imm));
+                    heap[instr_ptr->mem] = arr;
+                }
                 break;
             }
             case OpCodeImpl::OpCode::MOVMM: {
-                heap[instr_ptr->mem] = static_cast<signed char>(registers[instr_ptr->imm]);
+                if (instr_ptr->mem < heap.size()) {
+                    if (heap[instr_ptr->mem] != nullptr) {
+                        heap[instr_ptr->mem]->del_ref();
+                    }
+                    auto* arr = new LmArray(1);
+                    arr->push(TaggedUtil::encode_Smi(registers[instr_ptr->imm]));
+                    heap[instr_ptr->mem] = arr;
+                }
                 break;
             }
             case OpCodeImpl::OpCode::MOVMR: {
-                heap[instr_ptr->mem] = static_cast<signed char>(registers[instr_ptr->rs]);
+                if (instr_ptr->mem < heap.size()) {
+                    if (heap[instr_ptr->mem] != nullptr) {
+                        heap[instr_ptr->mem]->del_ref();
+                    }
+                    auto* arr = new LmArray(1);
+                    arr->push(TaggedUtil::encode_Smi(registers[instr_ptr->rs]));
+                    heap[instr_ptr->mem] = arr;
+                }
                 break;
             }
             case OpCodeImpl::OpCode::ADDR: {
@@ -87,7 +108,15 @@ void RegisterVM::run(const std::vector<OpCodeImpl::Instruction>& program){
                 break;
             }
             case OpCodeImpl::OpCode::ADDM: {
-                registers[instr_ptr->rd] += heap[instr_ptr->mem];
+                if (instr_ptr->mem < heap.size() && heap[instr_ptr->mem] != nullptr) {
+                    auto* arr = dynamic_cast<LmArray*>(heap[instr_ptr->mem]);
+                    if (arr && arr->get_size() > 0) {
+                        TaggedVal val = arr->get(0);
+                        if (TaggedUtil::get_tagged_type(val) == TaggedType::Smi) {
+                            registers[instr_ptr->rd] += TaggedUtil::decode_Smi(val);
+                        }
+                    }
+                }
                 break;
             }
             case OpCodeImpl::OpCode::SUBR: {
@@ -99,7 +128,15 @@ void RegisterVM::run(const std::vector<OpCodeImpl::Instruction>& program){
                 break;
             }
             case OpCodeImpl::OpCode::SUBM: {
-                registers[instr_ptr->rd] -= heap[instr_ptr->mem];
+                if (instr_ptr->mem < heap.size() && heap[instr_ptr->mem] != nullptr) {
+                    auto* arr = dynamic_cast<LmArray*>(heap[instr_ptr->mem]);
+                    if (arr && arr->get_size() > 0) {
+                        TaggedVal val = arr->get(0);
+                        if (TaggedUtil::get_tagged_type(val) == TaggedType::Smi) {
+                            registers[instr_ptr->rd] -= TaggedUtil::decode_Smi(val);
+                        }
+                    }
+                }
                 break;
             }
             case OpCodeImpl::OpCode::MULR: {
@@ -111,7 +148,15 @@ void RegisterVM::run(const std::vector<OpCodeImpl::Instruction>& program){
                 break;
             }
             case OpCodeImpl::OpCode::MULM: {
-                registers[instr_ptr->rd] *= heap[instr_ptr->mem];
+                if (instr_ptr->mem < heap.size() && heap[instr_ptr->mem] != nullptr) {
+                    auto* arr = dynamic_cast<LmArray*>(heap[instr_ptr->mem]);
+                    if (arr && arr->get_size() > 0) {
+                        TaggedVal val = arr->get(0);
+                        if (TaggedUtil::get_tagged_type(val) == TaggedType::Smi) {
+                            registers[instr_ptr->rd] *= TaggedUtil::decode_Smi(val);
+                        }
+                    }
+                }
                 break;
             }
             case OpCodeImpl::OpCode::DIVR: {
@@ -123,7 +168,15 @@ void RegisterVM::run(const std::vector<OpCodeImpl::Instruction>& program){
                 break;
             }
             case OpCodeImpl::OpCode::DIVM: {
-                registers[instr_ptr->rd] /= heap[instr_ptr->mem];
+                if (instr_ptr->mem < heap.size() && heap[instr_ptr->mem] != nullptr) {
+                    auto* arr = dynamic_cast<LmArray*>(heap[instr_ptr->mem]);
+                    if (arr && arr->get_size() > 0) {
+                        TaggedVal val = arr->get(0);
+                        if (TaggedUtil::get_tagged_type(val) == TaggedType::Smi) {
+                            registers[instr_ptr->rd] /= TaggedUtil::decode_Smi(val);
+                        }
+                    }
+                }
                 break;
             }
             case OpCodeImpl::OpCode::IFRR: {
@@ -133,7 +186,6 @@ void RegisterVM::run(const std::vector<OpCodeImpl::Instruction>& program){
                 }
                 break;
             }
-            case OpCodeImpl::OpCode::SYSCALL:
             case OpCodeImpl::OpCode::VMCALL: {
                 registerUnionHandler(instr_ptr);
                 break;
@@ -195,9 +247,15 @@ void RegisterVM::funcCalling(const OpCodeImpl::Instruction *instr) {
 
 inline void RegisterVM::newOnHeap(const OpCodeImpl::Instruction *instr) {
     if(instr->data.empty()) vm_error(*instr);
-    registers[1] = static_cast<int64_t>(heap.size());
-    heap.reserve(heap.size() + instr->data.size());
-    heap.insert(heap.end(),instr->data.begin(),instr->data.end());
+
+    auto* arr = new LmArray(instr->data.size());
+    for (const auto& byte : instr->data) {
+        arr->push(TaggedUtil::encode_Smi(byte));
+    }
+
+    size_t addr = heap.size();
+    heap.push_back(arr);
+    registers[1] = static_cast<int64_t>(addr);
 }
 
 inline void RegisterVM::registerUnionHandler(const OpCodeImpl::Instruction* instr) {

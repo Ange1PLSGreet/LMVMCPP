@@ -10,51 +10,28 @@ option(ENABLE_FLTO "Enable Link Time Optimization" ON)
 # 启用测试
 enable_testing()
 
-# 使用系统安装的 GTest，默认关闭
-option(USE_SYSTEM_GTEST "Use system-installed GTest instead of submodule" OFF)
-
-if (USE_SYSTEM_GTEST)
-    # 查找GTest
-    find_package(GTest REQUIRED)
-else()
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/third_party/googletest")
-        message(FATAL_ERROR "googletest submodule not found, maybe enable USE_SYSTEM_GTEST to use system-installed GTest, or run \"git submodule update --init --recursive\" to solve this. ")
-    endif()
-    # 使用submodule里的GTest
-    add_subdirectory(third_party/googletest)
-endif()
-
 # 设置c++标准
 set(CMAKE_CXX_STANDARD 20)
 
-# 检查是否支持-mavx2
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
-if (COMPILER_SUPPORTS_AVX2)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
-endif()
-
-
-# 添加编译器选项
 if (MSVC)
-    # 添加异常处理标志
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
     if (ENABLE_FLTO)
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Ox /GL")# MSVC的LTO
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2 /Oi /Ot /Ob2 /Gy /GF /GL")
+        set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LTCG")
     else()
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Ox")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2 /Oi /Ot /Ob2 /Gy /GF")
     endif()
-    # MSVC 不支持 -mavx2，使用以下方式
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
 else()
-    # 暂时去掉优化, 有些编译器debug期不支持优化 -flto
-    if (ENABLE_FLTO)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -flto")
+   if (ENABLE_FLTO)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -funroll-loops -fomit-frame-pointer -flto -march=native")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
     else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -funroll-loops -fomit-frame-pointer -march=native")
     endif()
 endif()
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g3 -O0 -DDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
 
 add_executable(LMVMCPP
         src/main.cpp
@@ -64,38 +41,12 @@ add_executable(LMVMCPP
         src/opcode.hpp
         src/vm/vm.cpp
         src/vm/vm.hpp
-        src/vm/local_state.cpp
-        src/syscall/file_operand.cpp
         src/vm/handler.cpp
         src/vm/models.cpp
         src/vm/models.hpp
-        src/vm/handler_init.cpp
         src/vmcall/console_io.cpp
-        src/syscall/file_operand.hpp
-)
-
-add_executable(ConsoleIOTest
-        tests/console_io_test.cpp
-        src/vm/vm.cpp
-        src/vm/vm.hpp
+        src/vm/handler_fn.hpp
+        src/vm/handler_fn.cpp
         src/vm/local_state.cpp
-        src/vm/handler.cpp
-        src/vm/models.cpp
-        src/vm/models.hpp
-        src/vm/handler_init.cpp
-        src/vmcall/console_io.cpp
-        src/opcode.cpp
-        src/opcode.hpp
+        src/vm/local_state.cpp
 )
-
-# 链接GTest库
-if (USE_SYSTEM_GTEST)
-    target_link_libraries(ConsoleIOTest GTest::gtest GTest::gtest_main)
-else()
-    target_link_libraries(ConsoleIOTest gtest gtest_main)
-endif()
-
-# 只有UNIX才链接pthread
-if(UNIX)
-    target_link_libraries(ConsoleIOTest pthread)
-endif()

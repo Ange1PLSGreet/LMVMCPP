@@ -17,7 +17,6 @@ public:
     // =========================
     enum class OpCode: uint8_t {
         VMCALL,
-        SYSCALL,
         HALT,UNKNOWN,
 
         MOVRI, MOVRR, MOVRM,

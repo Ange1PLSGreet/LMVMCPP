@@ -6,9 +6,9 @@
 ********************************************************/
 #pragma once
 
-#include <cstdint>
 #include <cstring>
 #include <vector>
+#include <memory>
 
 class LmHeapObject;
 
@@ -352,7 +352,7 @@ public:
      * 构造函数，初始化WeakRef
      * @param obj
      */
-    explicit LmWeakRef(LmHeapObject* obj)
+    explicit LmWeakRef(const std::shared_ptr<LmHeapObject> &obj)
         : LmHeapObject(HeapObjType::WeakRef),
           target_(obj) {}
 
@@ -364,15 +364,12 @@ public:
 
     /**
      * 获取目标
-     * @return LmHeapObject*
+     * @return std::shared_ptr<LmHeapObject>
      */
-    [[nodiscard]] LmHeapObject* get_target() const { return target_; }
+    [[nodiscard]] std::shared_ptr<LmHeapObject> get_target() const {
+        return target_.lock();
+    }
 
-    /**
-     * 标记目标失衡！(失效)
-     * @return void
-     */
-    void invalidate() { target_ = nullptr; }
 private:
-    LmHeapObject* target_; // 指向目标对象
+    std::weak_ptr<LmHeapObject> target_;
 };

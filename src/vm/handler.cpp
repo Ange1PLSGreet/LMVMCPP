@@ -5,6 +5,7 @@
 -     This project is followed GPL-3.0 license
 ********************************************************/
 #include "handler.hpp"
+#include "handler_fn.hpp"
 #include "vm.hpp"
 
 RegisterVM* Handler::current_vm = nullptr;
@@ -14,8 +15,8 @@ void Handler::vmCallTable(RegisterVM& vm) {
     if (initialized) return;
     initialized = true;
     current_vm = &vm;
-    Handler handler_;
-    for (auto& handler : handler_.handlers) {
-        handler();
-    }
+    HandlerFunction<0>::func();
+    HandlerFunction<1>::func();
+    HandlerFunction<2>::func();
+
 }
