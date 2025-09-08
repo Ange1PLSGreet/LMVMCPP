@@ -6,7 +6,7 @@
 ********************************************************/
 #include "console_io.hpp"
 #include "../vm/handler.hpp"
-
+#include <string>
 void ConsoleIO::vmCallPrint() {
     RegisterVM::vm_call_handlers[0] = [](const OpCodeImpl::Instruction*) {
         RegisterVM* vm = Handler::current_vm;
@@ -52,19 +52,15 @@ void ConsoleIO::vmCallInput() {
             }
         }
         fputs(prompt.c_str(), stdout);
-
         std::string input;
         std::getline(std::cin, input);
-
         auto* arr = new LmArray(input.length() + 1);
         for (size_t i = 0; i < input.length(); ++i) {
             arr->push(TaggedUtil::encode_Smi(input[i]));
         }
         arr->push(TaggedUtil::encode_Smi(0));
-
         size_t output_addr = vm->heap.size();
         vm->heap.push_back(arr);
-
         vm->registers[0] = static_cast<int64_t>(output_addr);
     };
 }
