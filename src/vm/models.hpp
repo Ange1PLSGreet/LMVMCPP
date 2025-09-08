@@ -9,6 +9,7 @@
 #include <cstring>
 #include <vector>
 #include <memory>
+#include <unordered_map>
 
 class LmHeapObject;
 
