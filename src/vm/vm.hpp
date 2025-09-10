@@ -18,7 +18,7 @@
 // =========================
 // 定义寄存器数量
 // =========================
-constexpr uint8_t NUM_REGS = 15; // r0 ~ r14
+constexpr uint8_t NUM_REGS = 16; // r0 ~ r15
 
 // 使用内存对齐属性
 struct alignas(uint8_t) Registers {
@@ -61,6 +61,14 @@ public:
      * @param registers
      */
     void restoreAllRegisters(int64_t* registers);
+
+    /**
+     * 设置寄存器
+     * @param reg_index
+     * @param value
+     */
+    void setRegister(uint8_t reg_index, int64_t value);
+
 private:
     // 定义一些私有成员变量
     // 内存对齐

@@ -232,10 +232,13 @@ size_t RegisterVM::newCall(const std::vector<OpCodeImpl::Instruction>& program){
 #else
 inline
 #endif
-void RegisterVM::funcCalling(const OpCodeImpl::Instruction *instr) {
+inline void RegisterVM::funcCalling(const OpCodeImpl::Instruction *instr) {
     try {
         LocalState local_state;
         local_state.saveAllRegisters(registers);
+        for (int i = 3; i <= 15; ++i) {
+            local_state.setRegister(i, registers[i]);
+        }
         run(FuncLists[instr->imm]);
         local_state.setReturnValue(registers[0]);
         local_state.restoreAllRegisters(registers);

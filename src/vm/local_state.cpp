@@ -130,3 +130,10 @@ void LocalState::restoreAllRegisters(int64_t *registers) {
 #endif
     reg_mask = 0;
 }
+
+void LocalState::setRegister(uint8_t reg_index, int64_t value) {
+    if (reg_index < NUM_REGS) {
+        saved_registers.regs[reg_index] = value;
+        reg_mask |= (1ULL << reg_index);
+    }
+}
